@@ -18,8 +18,8 @@ class Artist:
     def export_list(self):
         df = pd.DataFrame(self.songs, index=range(len(self.songs)))
         file_name = '{}.csv'.format(self.name)
-        directory = '..\\artists_data'
-        df.to_csv(os.path.join(directory, file_name), encoding='utf-8',sep=',')
+        directory = '.\\artists_data'
+        df.to_csv(os.path.join(directory, file_name), encoding='utf-8', sep=',')
 
 
 def get_songs(artist_url):
@@ -31,18 +31,19 @@ def get_songs(artist_url):
     archive = soup2.find(id='archive')
     try:
         songs = archive.find_all('a', href=True)
+        for song in songs:
+            song_title = song.text
+            song_url = requests.get(song['href'])
+            song_url.encoding = 'utf-8'
+            song_page = BeautifulSoup(song_url.text, 'html.parser')
+            try:
+                song_link = song_page.find('a', {'class': 'btn'})['href']
+                artist.add_song(song_title, song_link)
+            except:
+                print(f'{song.text} link missing on {artist_name}')
     except:
         print(f'{artist_name} link not found')
-    for song in songs:
-        song_title = song.text
-        song_url = requests.get(song['href'])
-        song_url.encoding = 'utf-8'
-        song_page = BeautifulSoup(song_url.text, 'html.parser')
-        try:
-            song_link = song_page.find('a', {'class': 'btn'})['href']
-            artist.add_song(song_title, song_link)
-        except:
-            print(f'{song.text} link missing on {artist_name}')
+
     artist.export_list()
 
 
