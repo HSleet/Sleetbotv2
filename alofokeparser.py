@@ -8,12 +8,12 @@ class Artist:
 
     def __init__(self, name):
         self.name = name
-        self.songs = dict()
+        self.songs = list()
 
     def add_song(self, song_name, url):
         song_name = song_name
         song_url = url
-        self.songs.update({'song': song_name, 'url': song_url})
+        self.songs.append({'song': song_name, 'url': song_url})
 
     def export_list(self):
         df = pd.DataFrame(self.songs, index=range(len(self.songs)))
