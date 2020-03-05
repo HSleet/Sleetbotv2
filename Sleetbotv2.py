@@ -21,8 +21,7 @@ def db_query(search_keywords):
         query_match = [f'%{keyword}%' for keyword in kw_list]
         query_match = ' '.join(query_match)
         c = conn.cursor()
-        c.execute(f"SELECT  artists.name, songs.song_name, songs.file_url FROM songs INNER JOIN artists "
-                  f"ON songs.artist_id = artists.id WHERE song_name LIKE '{query_match}'")
+        c.execute(f"SELECT songs.artist, songs.song_name, songs.file_url FROM songs WHERE song_name LIKE '{query_match}'")
         songs = c.fetchmany(10)
     return songs
 
@@ -62,15 +61,24 @@ def cat(update, context):
     update.message.reply_photo(kitten, quote=True)
 
 
+def reverse(update, context):
+    text = context.args
+    text = ' '.join(text)
+    reverse_text = text[::-1]
+    update.message.reply_text(reverse_text)
+
+
 updater = Updater(token=BOT_TOKEN, use_context=True)
 dp = updater.dispatcher
 
+dp.add_handler(CommandHandler('reverse', reverse))
+dp.add_handler(CommandHandler('cat', cat))
 dp.add_handler(CommandHandler("start", start))
 dp.add_handler(CommandHandler("help", help))
-dp.add_handler(MessageHandler(Filters.text, echo))
 dp.add_handler(InlineQueryHandler(inlinequery))
+dp.add_handler(MessageHandler(Filters.text, echo))
 dp.add_error_handler(error)
-dp.add_handler(CommandHandler('cat', cat))
+
 
 updater.start_polling()
 updater.idle()
