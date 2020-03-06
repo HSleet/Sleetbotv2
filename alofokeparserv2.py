@@ -33,47 +33,110 @@ def get_last_song():
     return match(tag_href)
 
 
-def main():
+def update(number):
+    start = get_last_song()
+    end = start - number
+    if end < 0:
+        raise ValueError(f'Number should be less than {start}')
+    try:
+        end = int(end)
+    except ValueError:
+        print(f'{number} is not a valid int')
+        raise
+    print('connecting to database...')
+    try:
+        connect = sqlite3.connect('alofoke.db')
+        print('Connected')
+    except:
+        print('Could not establish connection to DB')
+        raise
+    with connect:
+        print(f'checking last {number} links')
+        parse_loop(start,end, connect)
 
+
+def parse_loop(start, end, connect):
+    for i in range(start, end, -1):
+        url = f'http://alofokemusic.net/musica/{i}/'
+        print(f'Requesting {url}...')
+        request = requests.get(url, allow_redirects=False)
+        request.encoding = 'utf-8'
+        if request.status_code == 200:
+            print(f'{request.status_code} - {request.url}:\nLooking for song info..')
+            soup = bs(request.text, 'html.parser')
+            btn = soup.find('a', {'class': 'btn'})
+            info = soup.find(id='title')
+            song_title = info.text
+            song_info = song_title.split('–')
+            artists = song_info[:-1]
+            try:
+                artists = artists[0].split('ft')
+            except:
+                artists = [song_title]
+            artist = artists[0]
+            try:
+                download_link = btn['href']
+                print(f'{song_title} Download Link found')
+                print(f'Sending {artist}, {song_title} to songs table')
+            except:
+                download_link = None
+                print(f'{song_title}: No download Link')
+                continue
+            song = (artist, song_title, download_link)
+            add_song(connect, song)
+
+
+def get_all_songs():
+    print('connecting to database...')
+    try:
+        connect = sqlite3.connect('alofoke.db')
+        print('Connected')
+    except:
+        print('Could not establish connection to DB')
+        raise
     with connect:
         create_table(connect, sql_create_songs_table)
         loop_start = get_last_song()
         print(f'Starting loop on {loop_start}')
-        for i in range(loop_start, 0, -1):
-            url = f'http://alofokemusic.net/musica/{i}/'
-            print(f'Requesting {url}...')
-            request = requests.get(url, allow_redirects=False)
-            request.encoding = 'utf-8'
-            if request.status_code == 200:
-                print(f'{request.status_code} - {request.url}:\nLooking for song info..')
-                soup = bs(request.text, 'html.parser')
-                btn = soup.find('a', {'class': 'btn'})
-                info = soup.find(id='title')
-                song_title = info.text
-                song_info = song_title.split('–')
-                artists = song_info[:-1]
-                try:
-                    artists = artists[0].split('ft')
-                except:
-                    artists = [song_title]
-                artist = artists[0]
-                try:
-                    download_link = btn['href']
-                    print(f'{song_title} Download Link found')
-                    print(f'Sending {artist}, {song_title} to songs table')
-                except:
-                    download_link = None
-                    print(f'{song_title}: No download Link')
-                    continue
-                song = (artist, song_title, download_link)
-                add_song(connect, song)
+        parse_loop(loop_start, 0, connect)
 
 
-print('connecting to database...')
-try:
-    connect = sqlite3.connect('alofoke.db')
-    print('Connected')
-except:
-    print('Could not establish connection to DB')
-    raise
-main()
+if __name__ == '__main__':
+    get_all_songs()
+
+# def main():
+#     with connect:
+#         get_all_songs()
+        # create_table(connect, sql_create_songs_table)
+        # loop_start = get_last_song()
+        # print(f'Starting loop on {loop_start}')
+        # for i in range(loop_start, 0, -1):
+        #     url = f'http://alofokemusic.net/musica/{i}/'
+        #     print(f'Requesting {url}...')
+        #     request = requests.get(url, allow_redirects=False)
+        #     request.encoding = 'utf-8'
+        #     if request.status_code == 200:
+        #         print(f'{request.status_code} - {request.url}:\nLooking for song info..')
+        #         soup = bs(request.text, 'html.parser')
+        #         btn = soup.find('a', {'class': 'btn'})
+        #         info = soup.find(id='title')
+        #         song_title = info.text
+        #         song_info = song_title.split('–')
+        #         artists = song_info[:-1]
+        #         try:
+        #             artists = artists[0].split('ft')
+        #         except:
+        #             artists = [song_title]
+        #         artist = artists[0]
+        #         try:
+        #             download_link = btn['href']
+        #             print(f'{song_title} Download Link found')
+        #             print(f'Sending {artist}, {song_title} to songs table')
+        #         except:
+        #             download_link = None
+        #             print(f'{song_title}: No download Link')
+        #             continue
+        #         song = (artist, song_title, download_link)
+        #         add_song(connect, song)
+
+

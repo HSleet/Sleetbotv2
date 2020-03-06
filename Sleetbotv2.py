@@ -21,8 +21,8 @@ def db_query(search_keywords):
         query_match = [f'%{keyword}%' for keyword in kw_list]
         query_match = ' '.join(query_match)
         c = conn.cursor()
-        c.execute(f"SELECT songs.artist, songs.song_name, songs.file_url FROM songs WHERE song_name LIKE '{query_match}'")
-        songs = c.fetchmany(10)
+        c.execute(f"SELECT songs.artist, songs.song_name, songs.file_url FROM songs WHERE song_name LIKE '{query_match}' OR artist LIKE '{query_match}'")
+        songs = c.fetchmany(25)
     return songs
 
 
