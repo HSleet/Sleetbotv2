@@ -1,1 +1,1 @@
-web: python sleetbot.py
+bot: python sleetbot.py
