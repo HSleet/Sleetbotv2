@@ -82,7 +82,7 @@ updater = Updater(token=BOT_TOKEN, use_context=True)
 updater.start_webhook(listen="0.0.0.0",
                       port=int(PORT),
                       url_path=BOT_TOKEN)
-updater.start_webhook("https://sleetbot.herokuapp.com/"+BOT_TOKEN)
+updater.bot.setWebhook("https://sleetbot.herokuapp.com/"+BOT_TOKEN)
 bot = Bot(token=BOT_TOKEN)
 dp = updater.dispatcher
 dp.add_handler(CommandHandler('reverse', reverse))
