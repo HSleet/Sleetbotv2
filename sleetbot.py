@@ -6,6 +6,8 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode, Bot
 
 
+PORT = int(os.environ.get('PORT', 5000))
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -76,6 +78,11 @@ def spotify_button(update, context):
 
 
 updater = Updater(token=BOT_TOKEN, use_context=True)
+
+updater.start_webhook(listen="0.0.0.0",
+                      port=int(PORT),
+                      url_path=BOT_TOKEN)
+updater.start_webhook("https://sleetbot.herokuapp.com/"+BOT_TOKEN)
 bot = Bot(token=BOT_TOKEN)
 dp = updater.dispatcher
 dp.add_handler(CommandHandler('reverse', reverse))
