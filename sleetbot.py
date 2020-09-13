@@ -51,29 +51,43 @@ def mocking_text(update, context):
 def spotify_search(update, context):
     text = " ".join(context.args)
     top_5_songs = spotify_parser.search_query(search_parameter=text)
-    button_list = [
-        [InlineKeyboardButton(f'{song["song"]["name"]} - {song["artists"]}',
-                              callback_data=song["song"]["song_id"])] for song in top_5_songs
-    ]
-    keyboard = InlineKeyboardMarkup(button_list)
-    update.message.reply_text("Select a song:", reply_markup=keyboard)
-
-
-def spotify_button(update, context):
-    query = update.callback_query
-    query.answer()
-    track = Track(track_id=query.data)
+    ############################################
+    chat_id = update.effective_chat.id
+    track = Track(track_id=top_5_songs[0]["song"]["song_id"])
     md_song = f"[{track.name}]({track.url})\n[{track.artist.artist_name}]({track.artist.artist_url})"
-    query.message.delete()
     button_list = [[InlineKeyboardButton("Open in spotify", url=track.url)]]
     keyboard = InlineKeyboardMarkup(button_list)
-    bot.send_message(chat_id=query.message.chat_id,
+    bot.send_message(chat_id=chat_id,
                      text=md_song,
                      parse_mode=ParseMode.MARKDOWN,
                      disable_web_page_preview=True,
                      reply_markup=keyboard)
-    bot.send_audio(chat_id=query.message.chat_id,
+    bot.send_audio(chat_id=chat_id,
                    audio=track.preview)
+    ############################################
+    # button_list = [
+    #     [InlineKeyboardButton(f'{song["song"]["name"]} - {song["artists"]}',
+    #                           callback_data=song["song"]["song_id"])] for song in top_5_songs
+    # ]
+    # keyboard = InlineKeyboardMarkup(button_list)
+    # update.message.reply_text("Select a song:", reply_markup=keyboard)
+
+
+# def spotify_button(update, context):
+#     query = update.callback_query
+#     query.answer()
+#     track = Track(track_id=query.data)
+#     md_song = f"[{track.name}]({track.url})\n[{track.artist.artist_name}]({track.artist.artist_url})"
+#     query.message.delete()
+#     button_list = [[InlineKeyboardButton("Open in spotify", url=track.url)]]
+#     keyboard = InlineKeyboardMarkup(button_list)
+#     bot.send_message(chat_id=query.message.chat_id,
+#                      text=md_song,
+#                      parse_mode=ParseMode.MARKDOWN,
+#                      disable_web_page_preview=True,
+#                      reply_markup=keyboard)
+#     bot.send_audio(chat_id=query.message.chat_id,
+#                    audio=track.preview)
 
 
 updater = Updater(token=BOT_TOKEN, use_context=True)
@@ -83,7 +97,7 @@ dp = updater.dispatcher
 dp.add_handler(CommandHandler('reverse', reverse))
 dp.add_handler(CommandHandler('mock', mocking_text))
 dp.add_handler(CommandHandler('spotify', spotify_search))
-dp.add_handler(CallbackQueryHandler(spotify_button, pattern=r'^[a-zA-Z0-9]{22}$'))
+# dp.add_handler(CallbackQueryHandler(spotify_button, pattern=r'^[a-zA-Z0-9]{22}$'))
 
 dp.add_handler(CommandHandler('ud', urban_dictionary))
 
@@ -93,9 +107,9 @@ dp.add_handler(CommandHandler('ud', urban_dictionary))
 # dp.add_handler(InlineQueryHandler(inlinequery))
 # dp.add_handler(MessageHandler(Filters.text, echo))
 dp.add_error_handler(error)
-
-updater.start_webhook(listen="0.0.0.0",
-                      port=int(PORT),
-                      url_path=BOT_TOKEN)
-updater.bot.setWebhook("https://sleetbot.herokuapp.com/"+BOT_TOKEN)
+updater.start_polling()
+# updater.start_webhook(listen="0.0.0.0",
+#                       port=int(PORT),
+#                       url_path=BOT_TOKEN)
+# updater.bot.setWebhook("https://sleetbot.herokuapp.com/"+BOT_TOKEN)
 updater.idle()
