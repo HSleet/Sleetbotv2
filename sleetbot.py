@@ -107,9 +107,9 @@ dp.add_handler(CommandHandler('ud', urban_dictionary))
 # dp.add_handler(InlineQueryHandler(inlinequery))
 # dp.add_handler(MessageHandler(Filters.text, echo))
 dp.add_error_handler(error)
-updater.start_polling()
-# updater.start_webhook(listen="0.0.0.0",
-#                       port=int(PORT),
-#                       url_path=BOT_TOKEN)
-# updater.bot.setWebhook("https://sleetbot.herokuapp.com/"+BOT_TOKEN)
+# updater.start_polling()
+updater.start_webhook(listen="0.0.0.0",
+                      port=int(PORT),
+                      url_path=BOT_TOKEN)
+updater.bot.setWebhook("https://sleetbot.herokuapp.com/"+BOT_TOKEN)
 updater.idle()
