@@ -56,7 +56,7 @@ def spotify_search(update, context):
                               callback_data=song["song"]["song_id"])] for song in top_5_songs
     ]
     keyboard = InlineKeyboardMarkup(button_list)
-    update.message.reply_text("which song is it?", reply_markup=keyboard)
+    update.message.reply_text("Select a song:", reply_markup=keyboard)
 
 
 def spotify_button(update, context):
@@ -72,17 +72,12 @@ def spotify_button(update, context):
                      parse_mode=ParseMode.MARKDOWN,
                      disable_web_page_preview=True,
                      reply_markup=keyboard)
-    print(track.preview)
     bot.send_audio(chat_id=query.message.chat_id,
                    audio=track.preview)
 
 
 updater = Updater(token=BOT_TOKEN, use_context=True)
 
-updater.start_webhook(listen="0.0.0.0",
-                      port=int(PORT),
-                      url_path=BOT_TOKEN)
-updater.bot.setWebhook("https://sleetbot.herokuapp.com/"+BOT_TOKEN)
 bot = Bot(token=BOT_TOKEN)
 dp = updater.dispatcher
 dp.add_handler(CommandHandler('reverse', reverse))
@@ -99,5 +94,8 @@ dp.add_handler(CommandHandler('ud', urban_dictionary))
 # dp.add_handler(MessageHandler(Filters.text, echo))
 dp.add_error_handler(error)
 
-updater.start_polling()
+updater.start_webhook(listen="0.0.0.0",
+                      port=int(PORT),
+                      url_path=BOT_TOKEN)
+updater.bot.setWebhook("https://sleetbot.herokuapp.com/"+BOT_TOKEN)
 updater.idle()
